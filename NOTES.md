@@ -12,3 +12,12 @@
 - Only temporary errors are retried (429, 5xx, timeouts); 401/400 are not, since retrying can't fix them.
 - Added own Google AI Studio key via OpenRouter BYOK to avoid the crowded shared pool.
 - Test result: first call got 503, retry succeeded → retry logic needed even with BYOK.
+
+
+## DAY 2 : 
+- Extracted 193 pages from 3 PDFs (CSN401: 55, CSN441: 32, CSN442: 106).
+- CSN442: 43/149 pages (29%) image-only, incl. pages 62-82 → no text. Known limitation; OCR only if eval shows missing answers.
+- doc_type lower-cased so "Unit1" and "unit1" match (normalisation).
+- Text issues seen: letter-spaced headings ("R O A D M A P"), repeated footer per slide, diagram labels as loose words.
+- Slide counter "03 / 55" appears on PDF page 2 → citations use PDF page number (what users navigate by), not the slide label.
+- Footer "CSN401 · Compiler Design · Unit 1" kept: it adds the course name to every chunk.
