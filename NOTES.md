@@ -21,3 +21,10 @@
 - Text issues seen: letter-spaced headings ("R O A D M A P"), repeated footer per slide, diagram labels as loose words.
 - Slide counter "03 / 55" appears on PDF page 2 → citations use PDF page number (what users navigate by), not the slide label.
 - Footer "CSN401 · Compiler Design · Unit 1" kept: it adds the course name to every chunk.
+
+## Day 3: Chunking
+- Token stats (bge tokenizer): 243 pages, median 103, max 360, 0 over the 512 limit, 52 under 50 tokens.
+- Rule: 1 slide = 1 chunk; merge slides under 50 tokens with the next; never mix files; max 400 tokens.
+- Result: 243 pages → 196 chunks, 40 multi-page, median 128.5 tokens, 1 under 50 (final "Thank you" slide).
+- Found: chunk "p125-130" really held pages 125, 129, 130 (126-128 image-only) → chunks now store an exact "pages" list.
+- Open question for Day 11: should merging stop at page gaps?
