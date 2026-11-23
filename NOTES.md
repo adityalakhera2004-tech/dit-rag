@@ -28,3 +28,14 @@
 - Result: 243 pages → 196 chunks, 40 multi-page, median 128.5 tokens, 1 under 50 (final "Thank you" slide).
 - Found: chunk "p125-130" really held pages 125, 129, 130 (126-128 image-only) → chunks now store an exact "pages" list.
 - Open question for Day 11: should merging stop at page gaps?
+
+## Day 4: Embeddings + pgvector
+- Postgres 17 + pgvector in Docker (port 5433, volume ditrag_pgdata). Table: chunks with vector(384), index on course_code.
+- embed_store.py: full rebuild (TRUNCATE + INSERT in one transaction), bge-small, normalized, batch 32.
+- search.py: cosine distance (<=>), top-k = 5, optional WHERE course_code filter, %s placeholders (no SQL injection).
+- "What is a translator?" → correct chunk (p3-4) at 0.840, next 0.657 → clear winner.
+- "What is a perceptron?" → correct at 0.760, but chunk [39, 42] merged a "Hebbian Learning" title with the Perceptron slide across a gap → real example for the Day 11 gap question.
+- Equations extract as garbage characters (e.g. CSN441 unit3 p22-23) → known limitation for formula questions.
+- "Prerequisites for this course?" no filter → CSN441 p1 first, but 3/5 results from other courses. With CSN441 filter → 5/5 from CSN441. UI needs a course selector.
+- Same course-info slide in CSN441 unit1 + unit3 → duplicate chunks fill 2/5 places → add deduplication.
+- Keyword-style questions ("prerequisites") score lower (0.626) → motivation for hybrid search (Day 7).
