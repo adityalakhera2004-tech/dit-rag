@@ -39,3 +39,11 @@
 - "Prerequisites for this course?" no filter → CSN441 p1 first, but 3/5 results from other courses. With CSN441 filter → 5/5 from CSN441. UI needs a course selector.
 - Same course-info slide in CSN441 unit1 + unit3 → duplicate chunks fill 2/5 places → add deduplication.
 - Keyword-style questions ("prerequisites") score lower (0.626) → motivation for hybrid search (Day 7).
+
+## Day 6: Course detection
+- courses.py: regex \b([A-Za-z]{3})\s*-?\s*(\d{3})\b detects CSN441 / CSN 441 / csn-441; course names map to codes.
+- Unknown code (CSN999) → instant reply with available courses, no search, no LLM call.
+- Regression: deleting the code ("prerequisites for?") dropped the right slide out of the top 5.
+  Tested retrieval alone: delete = not in top 5, "this course" = #1, course name = #5 (Textbooks slide won).
+  Fix: replace the code with "this course".
+- pytest: 7 tests for detect_course, all passing.

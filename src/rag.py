@@ -1,6 +1,7 @@
 import re
 import sys
 
+from courses import COURSES, detect_course
 from llm import generate
 from search import search
 
@@ -50,9 +51,27 @@ def remove_duplicates(results):
     return unique
 
 
-def answer(question, course_code=None):
-    results = remove_duplicates(search(question, course_code, k=TOP_K + 3))[:TOP_K]
+def empty_result(message, course=None):
+    return {"answer": message, "model": None, "course": course,
+            "sources": [], "cited": [], "invalid_citations": []}
 
+
+def answer(question, course_code=None):
+    # 1. Work out the course: given explicitly, or detected from the question
+    search_question = question
+    if course_code:
+        course_code = course_code.upper()
+    else:
+        course_code, search_question, unknown = detect_course(question)
+        if unknown:
+            available = ", ".join(f"{c} ({n})" for c, n in COURSES.items())
+            return empty_result(f"I don't have course material for {unknown}. "
+                                f"Available courses: {available}.")
+
+    # 2. Retrieve with the cleaned question, filtered by course
+    results = remove_duplicates(search(search_question, course_code, k=TOP_K + 3))[:TOP_K]
+
+    # 3. Number the sources
     sources, blocks = [], []
     for i, (chunk_id, source, pages, text, score) in enumerate(results, start=1):
         word = "pages" if len(pages) > 1 else "page"
@@ -60,17 +79,19 @@ def answer(question, course_code=None):
         sources.append({"n": i, "label": label, "score": round(float(score), 3)})
         blocks.append(f"[{i}] {label}\n{text}")
 
+    # 4. Generate (the LLM sees the ORIGINAL question, code included)
     prompt = PROMPT_TEMPLATE.format(not_found=NOT_FOUND,
                                     sources="\n\n".join(blocks),
                                     question=question)
     reply, model = generate(prompt)
 
+    # 5. Check citations
     cited = sorted({int(n) for n in re.findall(r"\[(\d+)\]", reply)})
     valid = [n for n in cited if 1 <= n <= len(sources)]
     invalid = [n for n in cited if n not in valid]
 
-    return {"answer": reply, "model": model, "sources": sources,
-            "cited": valid, "invalid_citations": invalid}
+    return {"answer": reply, "model": model, "course": course_code,
+            "sources": sources, "cited": valid, "invalid_citations": invalid}
 
 
 if __name__ == "__main__":
@@ -83,7 +104,8 @@ if __name__ == "__main__":
         print(f"\nSorry, the answer service is busy right now: {e}")
         sys.exit(1)
 
-    print(f"\nQ: {question}" + (f"  [course: {course}]" if course else ""))
+    print(f"\nQ: {question}")
+    print(f"(course filter: {result['course'] or 'all courses'})")
     print(f"\nA: {result['answer']}")
     print("\nSources cited:")
     if not result["cited"]:
@@ -93,4 +115,5 @@ if __name__ == "__main__":
             print(f"  [{s['n']}] {s['label']}  (score {s['score']})")
     if result["invalid_citations"]:
         print(f"  ⚠️ Cited numbers that don't exist: {result['invalid_citations']}")
-    print(f"\n(model: {result['model']})")
+    if result["model"]:
+        print(f"\n(model: {result['model']})")
