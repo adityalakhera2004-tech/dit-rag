@@ -4,6 +4,7 @@ import sys
 from courses import COURSES, detect_course
 from llm import generate
 from search import search_with_confidence
+from smalltalk import small_talk_reply
 
 TOP_K = 5
 NOT_FOUND = "I couldn't find this in the course material."
@@ -68,7 +69,12 @@ def answer(question, course_code=None):
         return empty_result(f"Please keep your question under {MAX_QUESTION_CHARS} characters.",
                             refused="question too long")
 
-    # Guardrail 2: course detection (unknown course → instant reply)
+    # Guardrail 2: small talk (pure greetings / thanks) → friendly reply, no search
+    chat_reply = small_talk_reply(question)
+    if chat_reply:
+        return empty_result(chat_reply, refused="small talk")
+
+    # Guardrail 3: course detection (unknown course → instant reply)
     search_question = question
     if course_code:
         course_code = course_code.upper()
@@ -83,7 +89,7 @@ def answer(question, course_code=None):
     results, top_similarity = search_with_confidence(search_question, course_code, k=TOP_K + 3)
     results = remove_duplicates(results)[:TOP_K]
 
-    # Guardrail 3: nothing close enough → refuse without calling the LLM
+    # Guardrail 4: nothing close enough → refuse without calling the LLM
     if top_similarity < MIN_SIMILARITY:
         return empty_result(NOT_FOUND, course_code, round(top_similarity, 3),
                             refused="low similarity")
@@ -102,7 +108,7 @@ def answer(question, course_code=None):
                                     question=question)
     reply, model = generate(prompt)
 
-    # Guardrail 4: check citations
+    # Guardrail 5: check citations
     cited = sorted({int(n) for n in re.findall(r"\[(\d+)\]", reply)})
     valid = [n for n in cited if 1 <= n <= len(sources)]
     invalid = [n for n in cited if n not in valid]

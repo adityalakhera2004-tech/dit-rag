@@ -47,3 +47,11 @@
   Tested retrieval alone: delete = not in top 5, "this course" = #1, course name = #5 (Textbooks slide won).
   Fix: replace the code with "this course".
 - pytest: 7 tests for detect_course, all passing.
+
+## Day 9: Streamlit UI
+- src/app.py: chat page at localhost:8501; course selector (auto-detect or pick); collapsible sources; grey info line (course, similarity, model).
+- session_state holds chat history (script reruns on every click); @st.cache_resource loads the model once.
+- UI is a thin layer over rag.answer() → separation of concerns.
+- "hello" scored 0.627 (> 0.55 threshold): short inputs embed vaguely. Added smalltalk.py (exact-match greetings/thanks) + 3 tests → 13 tests pass.
+- Bug: UnboundLocalError from a misplaced pasted line; fixed by replacing rag.py, renamed variable to chat_reply.
+- Run: streamlit run src/app.py (Docker must be running).
