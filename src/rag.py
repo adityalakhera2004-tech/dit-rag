@@ -3,10 +3,12 @@ import sys
 
 from courses import COURSES, detect_course
 from llm import generate
-from search import search
+from search import search_with_confidence
 
 TOP_K = 5
 NOT_FOUND = "I couldn't find this in the course material."
+MIN_SIMILARITY = 0.55        # below this, refuse without calling the LLM (Day 8 measurements)
+MAX_QUESTION_CHARS = 500     # longer input is rejected
 
 PROMPT_TEMPLATE = """You are a study assistant for DIT University students.
 Answer the question using ONLY the numbered sources below.
@@ -51,13 +53,22 @@ def remove_duplicates(results):
     return unique
 
 
-def empty_result(message, course=None):
+def empty_result(message, course=None, top_similarity=None, refused=None):
     return {"answer": message, "model": None, "course": course,
-            "sources": [], "cited": [], "invalid_citations": []}
+            "sources": [], "cited": [], "invalid_citations": [],
+            "top_similarity": top_similarity, "refused": refused}
 
 
 def answer(question, course_code=None):
-    # 1. Work out the course: given explicitly, or detected from the question
+    # Guardrail 1: input checks
+    question = question.strip()
+    if not question:
+        return empty_result("Please type a question.", refused="empty question")
+    if len(question) > MAX_QUESTION_CHARS:
+        return empty_result(f"Please keep your question under {MAX_QUESTION_CHARS} characters.",
+                            refused="question too long")
+
+    # Guardrail 2: course detection (unknown course → instant reply)
     search_question = question
     if course_code:
         course_code = course_code.upper()
@@ -66,32 +77,39 @@ def answer(question, course_code=None):
         if unknown:
             available = ", ".join(f"{c} ({n})" for c, n in COURSES.items())
             return empty_result(f"I don't have course material for {unknown}. "
-                                f"Available courses: {available}.")
+                                f"Available courses: {available}.", refused="unknown course")
 
-    # 2. Retrieve with the cleaned question, filtered by course
-    results = remove_duplicates(search(search_question, course_code, k=TOP_K + 3))[:TOP_K]
+    # Retrieve
+    results, top_similarity = search_with_confidence(search_question, course_code, k=TOP_K + 3)
+    results = remove_duplicates(results)[:TOP_K]
 
-    # 3. Number the sources
+    # Guardrail 3: nothing close enough → refuse without calling the LLM
+    if top_similarity < MIN_SIMILARITY:
+        return empty_result(NOT_FOUND, course_code, round(top_similarity, 3),
+                            refused="low similarity")
+
+    # Number the sources
     sources, blocks = [], []
     for i, (chunk_id, source, pages, text, score) in enumerate(results, start=1):
         word = "pages" if len(pages) > 1 else "page"
         label = f"{source}, {word} {format_pages(pages)}"
-        sources.append({"n": i, "label": label, "score": round(float(score), 3)})
+        sources.append({"n": i, "label": label, "score": round(float(score), 4)})
         blocks.append(f"[{i}] {label}\n{text}")
 
-    # 4. Generate (the LLM sees the ORIGINAL question, code included)
+    # Generate (the LLM sees the ORIGINAL question)
     prompt = PROMPT_TEMPLATE.format(not_found=NOT_FOUND,
                                     sources="\n\n".join(blocks),
                                     question=question)
     reply, model = generate(prompt)
 
-    # 5. Check citations
+    # Guardrail 4: check citations
     cited = sorted({int(n) for n in re.findall(r"\[(\d+)\]", reply)})
     valid = [n for n in cited if 1 <= n <= len(sources)]
     invalid = [n for n in cited if n not in valid]
 
     return {"answer": reply, "model": model, "course": course_code,
-            "sources": sources, "cited": valid, "invalid_citations": invalid}
+            "sources": sources, "cited": valid, "invalid_citations": invalid,
+            "top_similarity": round(top_similarity, 3), "refused": None}
 
 
 if __name__ == "__main__":
@@ -105,14 +123,16 @@ if __name__ == "__main__":
         sys.exit(1)
 
     print(f"\nQ: {question}")
-    print(f"(course filter: {result['course'] or 'all courses'})")
+    print(f"(course filter: {result['course'] or 'all courses'} | "
+          f"top similarity: {result['top_similarity']} | "
+          f"refused: {result['refused'] or 'no'})")
     print(f"\nA: {result['answer']}")
     print("\nSources cited:")
     if not result["cited"]:
         print("  (none)")
     for s in result["sources"]:
         if s["n"] in result["cited"]:
-            print(f"  [{s['n']}] {s['label']}  (score {s['score']})")
+            print(f"  [{s['n']}] {s['label']}")
     if result["invalid_citations"]:
         print(f"  ⚠️ Cited numbers that don't exist: {result['invalid_citations']}")
     if result["model"]:

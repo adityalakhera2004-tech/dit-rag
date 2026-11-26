@@ -1,44 +1,90 @@
-import sys
+import argparse
 
 from sentence_transformers import SentenceTransformer
 
 from db import get_connection
 
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
+CANDIDATES = 20   # how many results each method contributes before merging
+RRF_K = 60        # standard Reciprocal Rank Fusion constant
+
+# Match ANY of the question's words (OR), not ALL of them (AND)
+KEYWORD_QUERY = "to_tsquery('english', replace(plainto_tsquery('english', %s)::text, ' & ', ' | '))"
+
 _model = None
 
 
 def get_model():
     global _model
-    if _model is None:                # load the model only once
+    if _model is None:
         _model = SentenceTransformer(MODEL_NAME)
     return _model
 
 
-def search(question, course_code=None, k=5):
+def vector_search(conn, question, course_code=None, limit=CANDIDATES):
     q_vec = get_model().encode(question, normalize_embeddings=True)
-
-    sql = """
-        SELECT chunk_id, source, pages, text,
-               1 - (embedding <=> %s) AS score
-        FROM chunks
+    where, params = ("WHERE course_code = %s", [course_code]) if course_code else ("", [])
+    sql = f"""
+        SELECT chunk_id, source, pages, text, 1 - (embedding <=> %s) AS score
+        FROM chunks {where}
+        ORDER BY embedding <=> %s
+        LIMIT %s
     """
-    params = [q_vec]
-    if course_code:
-        sql += " WHERE course_code = %s"
-        params.append(course_code)
-    sql += " ORDER BY embedding <=> %s LIMIT %s"
-    params += [q_vec, k]
+    return conn.execute(sql, [q_vec, *params, q_vec, limit]).fetchall()
 
+
+def keyword_search(conn, question, course_code=None, limit=CANDIDATES):
+    extra, params = ("AND course_code = %s", [course_code]) if course_code else ("", [])
+    sql = f"""
+        SELECT chunk_id, source, pages, text, ts_rank(text_search, query) AS score
+        FROM chunks, {KEYWORD_QUERY} AS query
+        WHERE text_search @@ query {extra}
+        ORDER BY score DESC
+        LIMIT %s
+    """
+    return conn.execute(sql, [question, *params, limit]).fetchall()
+
+
+def rrf_merge(result_lists, k=RRF_K):
+    """Reciprocal Rank Fusion: each list gives a chunk 1 / (k + rank) points."""
+    points, rows = {}, {}
+    for results in result_lists:
+        for rank, row in enumerate(results, start=1):
+            chunk_id = row[0]
+            points[chunk_id] = points.get(chunk_id, 0) + 1 / (k + rank)
+            rows.setdefault(chunk_id, row)
+    ranked = sorted(points, key=points.get, reverse=True)
+    return [(*rows[c][:4], points[c]) for c in ranked]
+
+
+def search(question, course_code=None, k=5, mode="hybrid"):
     with get_connection() as conn:
-        return conn.execute(sql, params).fetchall()
+        if mode == "vector":
+            return vector_search(conn, question, course_code, k)
+        if mode == "keyword":
+            return keyword_search(conn, question, course_code, k)
+        merged = rrf_merge([vector_search(conn, question, course_code),
+                            keyword_search(conn, question, course_code)])
+        return merged[:k]
+
+
+def search_with_confidence(question, course_code=None, k=5):
+    """Hybrid results PLUS the best vector similarity (how close the closest chunk is)."""
+    with get_connection() as conn:
+        vec = vector_search(conn, question, course_code)
+        kw = keyword_search(conn, question, course_code)
+    top_similarity = float(vec[0][4]) if vec else 0.0
+    return rrf_merge([vec, kw])[:k], top_similarity
 
 
 if __name__ == "__main__":
-    question = sys.argv[1] if len(sys.argv) > 1 else "What is a translator?"
-    course = sys.argv[2] if len(sys.argv) > 2 else None
+    parser = argparse.ArgumentParser(description="Search the course chunks.")
+    parser.add_argument("question")
+    parser.add_argument("--course", help="course code filter, e.g. CSN441")
+    parser.add_argument("--mode", default="hybrid", choices=["vector", "keyword", "hybrid"])
+    args = parser.parse_args()
 
-    print(f"Q: {question}" + (f"  [course: {course}]" if course else ""))
-    for chunk_id, source, pages, text, score in search(question, course):
-        print(f"\n{score:.3f} | {source} | pages {pages}")
-        print("   ", text[:150].replace("\n", " "))
+    print(f"Q: {args.question}  [mode: {args.mode}, course: {args.course or 'all'}]")
+    for chunk_id, source, pages, text, score in search(args.question, args.course, mode=args.mode):
+        print(f"\n{score:.4f} | {source} | pages {pages}")
+        print("   ", text[:120].replace("\n", " "))

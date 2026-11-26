@@ -35,6 +35,12 @@ SCHEMA = [
     )
     """,
     "CREATE INDEX IF NOT EXISTS idx_chunks_course ON chunks (course_code)",
+    # Day 7: keyword search. Postgres fills this column automatically from `text`.
+    """
+    ALTER TABLE chunks ADD COLUMN IF NOT EXISTS text_search tsvector
+        GENERATED ALWAYS AS (to_tsvector('english', text)) STORED
+    """,
+    "CREATE INDEX IF NOT EXISTS idx_chunks_fts ON chunks USING GIN (text_search)",
 ]
 
 
