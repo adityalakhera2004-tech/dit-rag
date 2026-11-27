@@ -1,0 +1,23 @@
+{
+  "in_scope": 24,
+  "answered": 23,
+  "facts_ok": 22,
+  "cite_ok": 23,
+  "invalid_citations": 0,
+  "out_of_scope": 6,
+  "refused": 6,
+  "refused_early": 2,
+  "models": [
+    "nvidia/nemotron-3-ultra-550b-a55b:free"
+  ],
+  "fails": [
+    [
+      "q04",
+      "missing ['weighted sum', 'step function']"
+    ],
+    [
+      "q20",
+      "refused a real question"
+    ]
+  ]
+}

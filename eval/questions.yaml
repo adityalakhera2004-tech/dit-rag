@@ -1,0 +1,176 @@
+# DIT RAG Bot evaluation set
+# In-scope: the answer is in the notes. Out-of-scope: the bot must refuse.
+# source + pages = where the answer really is (PDF page numbers)
+# must_include = 1-3 words/phrases a correct answer must contain (lowercase is fine)
+
+# ---------- CSN401: Compiler Design ----------
+- id: q01
+  question: What does a translator do?
+  source: CSN401_notes_Unit1.pdf
+  pages: [3, 4]
+  must_include: [source language, target language]
+
+- id: q02
+  question: What is a lexeme?
+  source: CSN401_notes_Unit1.pdf
+  pages: [27, 28]
+  must_include: [sequence of characters, token]
+
+- id: q07
+  question: How is a compiler different from an interpreter?
+  source: CSN401_notes_Unit1.pdf
+  pages: [6, 7, 9]
+  must_include: [whole program]
+
+- id: q08
+  question: What happens in the lexical analysis phase?
+  source: CSN401_notes_Unit1.pdf
+  pages: [13]
+  must_include: [tokens]
+
+- id: q09
+  question: What information does the symbol table store?
+  source: CSN401_notes_Unit1.pdf
+  pages: [19]
+  must_include: [identifier, type]
+
+- id: q10
+  question: Which parts of a compiler depend on the target machine?
+  source: CSN401_notes_Unit1.pdf
+  pages: [22]
+  must_include: [code optimization, code generation]
+
+- id: q11
+  question: What is the job of a linker?
+  source: CSN401_notes_Unit1.pdf
+  pages: [24]
+  must_include: [object code]
+
+- id: q12
+  question: When is a grammar called ambiguous?
+  source: CSN401_notes_Unit1.pdf
+  pages: [48]
+  must_include: [more than one]
+
+# ---------- CSN441: Fuzzy Logic & Neural Network ----------
+- id: q03
+  question: What are the prerequisites for CSN 441?
+  source: [CSN441_notes_unit1.pdf, CSN441_notes_unit3.pdf]
+  pages: [1]
+  must_include: [basic mathematics]
+
+- id: q04
+  question: How does a perceptron work?
+  source: CSN441_notes_unit3.pdf
+  pages: [42]
+  must_include: [weighted sum, step function]
+
+- id: q05
+  question: What is the Hebbian learning rule?
+  source: CSN441_notes_unit3.pdf
+  pages: [38]
+  must_include: [active together]
+
+- id: q13
+  question: How is soft computing different from hard computing?
+  source: CSN441_notes_unit1.pdf
+  pages: [13, 16, 23]
+  must_include: [uncertainty]
+
+- id: q14
+  question: Who introduced the term soft computing?
+  source: CSN441_notes_unit1.pdf
+  pages: [15]
+  must_include: [zadeh]
+
+- id: q15
+  question: How does fuzzy computing represent partial truth?
+  source: CSN441_notes_unit1.pdf
+  pages: [27]
+  must_include: [between 0 and 1]
+
+- id: q16
+  question: Why do we add a bias to a neuron?
+  source: CSN441_notes_unit3.pdf
+  pages: [37]
+  must_include: [boundary]
+
+- id: q17
+  question: Which activation function should I use for multi-class classification?
+  source: CSN441_notes_unit3.pdf
+  pages: [30, 33]
+  must_include: [softmax]
+
+- id: q18
+  question: Can a single perceptron learn the XOR function?
+  source: CSN441_notes_unit3.pdf
+  pages: [42, 46]
+  must_include: [linearly separable]
+
+# ---------- CSN442: Evolutionary Computing ----------
+- id: q06
+  question: Why do some problems need multi-objective optimization?
+  source: CSN442_notes_unit1.pdf
+  pages: [129, 130]
+  must_include: [single objective]
+
+- id: q19
+  question: What is evolutionary computation?
+  source: CSN442_notes_unit1.pdf
+  pages: [2, 4]
+  must_include: [evolution]
+
+- id: q20
+  question: How does an evolutionary algorithm decide how good a solution is?
+  source: CSN442_notes_unit1.pdf
+  pages: [30]
+  must_include: [fitness]
+
+- id: q21
+  question: What is the difference between mutation and recombination?
+  source: CSN442_notes_unit1.pdf
+  pages: [33, 34, 35]
+  must_include: [crossover]
+
+- id: q22
+  question: What is competitive learning?
+  source: CSN442_notes_unit1.pdf
+  pages: [44]
+  must_include: [winner]
+
+- id: q23
+  question: How is a global optimum different from a local optimum?
+  source: CSN442_notes_unit1.pdf
+  pages: [54, 55]
+  must_include: [entire]
+
+- id: q24
+  question: What are Pareto optimal solutions?
+  source: CSN442_notes_unit1.pdf
+  pages: [146]
+  must_include: [non-dominated]
+
+# ---------- Out of scope: the bot must refuse ----------
+- id: o01
+  type: out_of_scope
+  question: Who won the IPL in 2024?
+
+- id: o02
+  type: out_of_scope
+  question: Give me a recipe for paneer butter masala.
+
+- id: o03
+  type: out_of_scope
+  question: What is the capital of Australia?
+
+- id: o04
+  type: out_of_scope
+  question: How do I reverse a linked list in C++?
+
+- id: o05
+  type: out_of_scope
+  question: What is a binary search tree?
+
+- id: o06
+  type: out_of_scope
+  question: Explain the process of photosynthesis.

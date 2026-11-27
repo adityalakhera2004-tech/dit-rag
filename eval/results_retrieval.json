@@ -1,0 +1,409 @@
+{
+  "summary": {
+    "vector": {
+      "hit@1": 0.8333333333333334,
+      "hit@5": 0.9583333333333334,
+      "mrr": 0.8819444444444445
+    },
+    "vector+prefix": {
+      "hit@1": 0.8333333333333334,
+      "hit@5": 0.9583333333333334,
+      "mrr": 0.8729166666666667
+    },
+    "hybrid": {
+      "hit@1": 0.8333333333333334,
+      "hit@5": 0.9583333333333334,
+      "mrr": 0.876388888888889
+    },
+    "hybrid+prefix": {
+      "hit@1": 0.7916666666666666,
+      "hit@5": 0.9583333333333334,
+      "mrr": 0.8472222222222222
+    },
+    "hybrid+prefix+kw0.5": {
+      "hit@1": 0.7916666666666666,
+      "hit@5": 0.9583333333333334,
+      "mrr": 0.8472222222222222
+    }
+  },
+  "details": [
+    {
+      "id": "q01",
+      "question": "What does a translator do?",
+      "in_scope": true,
+      "sim_plain": 0.83,
+      "sim_prefix": 0.826,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q02",
+      "question": "What is a lexeme?",
+      "in_scope": true,
+      "sim_plain": 0.676,
+      "sim_prefix": 0.688,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q07",
+      "question": "How is a compiler different from an interpreter?",
+      "in_scope": true,
+      "sim_plain": 0.841,
+      "sim_prefix": 0.824,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q08",
+      "question": "What happens in the lexical analysis phase?",
+      "in_scope": true,
+      "sim_plain": 0.774,
+      "sim_prefix": 0.753,
+      "ranks": {
+        "vector": 3,
+        "vector+prefix": 4,
+        "hybrid": 3,
+        "hybrid+prefix": 3,
+        "hybrid+prefix+kw0.5": 4
+      }
+    },
+    {
+      "id": "q09",
+      "question": "What information does the symbol table store?",
+      "in_scope": true,
+      "sim_plain": 0.805,
+      "sim_prefix": 0.791,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q10",
+      "question": "Which parts of a compiler depend on the target machine?",
+      "in_scope": true,
+      "sim_plain": 0.773,
+      "sim_prefix": 0.735,
+      "ranks": {
+        "vector": 2,
+        "vector+prefix": 5,
+        "hybrid": 1,
+        "hybrid+prefix": 4,
+        "hybrid+prefix+kw0.5": 4
+      }
+    },
+    {
+      "id": "q11",
+      "question": "What is the job of a linker?",
+      "in_scope": true,
+      "sim_plain": 0.721,
+      "sim_prefix": 0.704,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q12",
+      "question": "When is a grammar called ambiguous?",
+      "in_scope": true,
+      "sim_plain": 0.812,
+      "sim_prefix": 0.762,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q03",
+      "question": "What are the prerequisites for CSN 441?",
+      "in_scope": true,
+      "sim_plain": 0.626,
+      "sim_prefix": 0.601,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q04",
+      "question": "How does a perceptron work?",
+      "in_scope": true,
+      "sim_plain": 0.737,
+      "sim_prefix": 0.716,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 2,
+        "hybrid+prefix": 2,
+        "hybrid+prefix+kw0.5": 2
+      }
+    },
+    {
+      "id": "q05",
+      "question": "What is the Hebbian learning rule?",
+      "in_scope": true,
+      "sim_plain": 0.842,
+      "sim_prefix": 0.818,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q13",
+      "question": "How is soft computing different from hard computing?",
+      "in_scope": true,
+      "sim_plain": 0.858,
+      "sim_prefix": 0.847,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q14",
+      "question": "Who introduced the term soft computing?",
+      "in_scope": true,
+      "sim_plain": 0.83,
+      "sim_prefix": 0.83,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q15",
+      "question": "How does fuzzy computing represent partial truth?",
+      "in_scope": true,
+      "sim_plain": 0.771,
+      "sim_prefix": 0.771,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q16",
+      "question": "Why do we add a bias to a neuron?",
+      "in_scope": true,
+      "sim_plain": 0.766,
+      "sim_prefix": 0.747,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q17",
+      "question": "Which activation function should I use for multi-class classification?",
+      "in_scope": true,
+      "sim_plain": 0.799,
+      "sim_prefix": 0.815,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q18",
+      "question": "Can a single perceptron learn the XOR function?",
+      "in_scope": true,
+      "sim_plain": 0.832,
+      "sim_prefix": 0.84,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q06",
+      "question": "Why do some problems need multi-objective optimization?",
+      "in_scope": true,
+      "sim_plain": 0.801,
+      "sim_prefix": 0.789,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q19",
+      "question": "What is evolutionary computation?",
+      "in_scope": true,
+      "sim_plain": 0.89,
+      "sim_prefix": 0.901,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q20",
+      "question": "How does an evolutionary algorithm decide how good a solution is?",
+      "in_scope": true,
+      "sim_plain": 0.81,
+      "sim_prefix": 0.81,
+      "ranks": {
+        "vector": null,
+        "vector+prefix": null,
+        "hybrid": null,
+        "hybrid+prefix": null,
+        "hybrid+prefix+kw0.5": null
+      }
+    },
+    {
+      "id": "q21",
+      "question": "What is the difference between mutation and recombination?",
+      "in_scope": true,
+      "sim_plain": 0.825,
+      "sim_prefix": 0.81,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q22",
+      "question": "What is competitive learning?",
+      "in_scope": true,
+      "sim_plain": 0.774,
+      "sim_prefix": 0.771,
+      "ranks": {
+        "vector": 3,
+        "vector+prefix": 2,
+        "hybrid": 5,
+        "hybrid+prefix": 4,
+        "hybrid+prefix+kw0.5": 3
+      }
+    },
+    {
+      "id": "q23",
+      "question": "How is a global optimum different from a local optimum?",
+      "in_scope": true,
+      "sim_plain": 0.833,
+      "sim_prefix": 0.823,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "q24",
+      "question": "What are Pareto optimal solutions?",
+      "in_scope": true,
+      "sim_plain": 0.816,
+      "sim_prefix": 0.821,
+      "ranks": {
+        "vector": 1,
+        "vector+prefix": 1,
+        "hybrid": 1,
+        "hybrid+prefix": 1,
+        "hybrid+prefix+kw0.5": 1
+      }
+    },
+    {
+      "id": "o01",
+      "question": "Who won the IPL in 2024?",
+      "in_scope": false,
+      "sim_plain": 0.484,
+      "sim_prefix": 0.459
+    },
+    {
+      "id": "o02",
+      "question": "Give me a recipe for paneer butter masala.",
+      "in_scope": false,
+      "sim_plain": 0.573,
+      "sim_prefix": 0.507
+    },
+    {
+      "id": "o03",
+      "question": "What is the capital of Australia?",
+      "in_scope": false,
+      "sim_plain": 0.477,
+      "sim_prefix": 0.469
+    },
+    {
+      "id": "o04",
+      "question": "How do I reverse a linked list in C++?",
+      "in_scope": false,
+      "sim_plain": 0.66,
+      "sim_prefix": 0.658
+    },
+    {
+      "id": "o05",
+      "question": "What is a binary search tree?",
+      "in_scope": false,
+      "sim_plain": 0.716,
+      "sim_prefix": 0.664
+    },
+    {
+      "id": "o06",
+      "question": "Explain the process of photosynthesis.",
+      "in_scope": false,
+      "sim_plain": 0.641,
+      "sim_prefix": 0.642
+    }
+  ]
+}

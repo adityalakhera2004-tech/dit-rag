@@ -7,7 +7,11 @@ from db import get_connection
 MODEL_NAME = "BAAI/bge-small-en-v1.5"
 CANDIDATES = 20   # how many results each method contributes before merging
 RRF_K = 60        # standard Reciprocal Rank Fusion constant
+QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
+# Settings used by the app (chosen from the Day 11 evaluation)
+USE_QUERY_PREFIX = False
+KEYWORD_WEIGHT = 1.0
 # Match ANY of the question's words (OR), not ALL of them (AND)
 KEYWORD_QUERY = "to_tsquery('english', replace(plainto_tsquery('english', %s)::text, ' & ', ' | '))"
 
@@ -21,8 +25,9 @@ def get_model():
     return _model
 
 
-def vector_search(conn, question, course_code=None, limit=CANDIDATES):
-    q_vec = get_model().encode(question, normalize_embeddings=True)
+def vector_search(conn, question, course_code=None, limit=CANDIDATES, use_prefix=False):
+    text = QUERY_PREFIX + question if use_prefix else question
+    q_vec = get_model().encode(text, normalize_embeddings=True)
     where, params = ("WHERE course_code = %s", [course_code]) if course_code else ("", [])
     sql = f"""
         SELECT chunk_id, source, pages, text, 1 - (embedding <=> %s) AS score
@@ -45,13 +50,14 @@ def keyword_search(conn, question, course_code=None, limit=CANDIDATES):
     return conn.execute(sql, [question, *params, limit]).fetchall()
 
 
-def rrf_merge(result_lists, k=RRF_K):
-    """Reciprocal Rank Fusion: each list gives a chunk 1 / (k + rank) points."""
+def rrf_merge(result_lists, k=RRF_K, weights=None):
+    """Reciprocal Rank Fusion: each list gives a chunk weight / (k + rank) points."""
+    weights = weights or [1.0] * len(result_lists)
     points, rows = {}, {}
-    for results in result_lists:
+    for results, weight in zip(result_lists, weights):
         for rank, row in enumerate(results, start=1):
             chunk_id = row[0]
-            points[chunk_id] = points.get(chunk_id, 0) + 1 / (k + rank)
+            points[chunk_id] = points.get(chunk_id, 0) + weight / (k + rank)
             rows.setdefault(chunk_id, row)
     ranked = sorted(points, key=points.get, reverse=True)
     return [(*rows[c][:4], points[c]) for c in ranked]
@@ -60,21 +66,22 @@ def rrf_merge(result_lists, k=RRF_K):
 def search(question, course_code=None, k=5, mode="hybrid"):
     with get_connection() as conn:
         if mode == "vector":
-            return vector_search(conn, question, course_code, k)
+            return vector_search(conn, question, course_code, k, use_prefix=USE_QUERY_PREFIX)
         if mode == "keyword":
             return keyword_search(conn, question, course_code, k)
-        merged = rrf_merge([vector_search(conn, question, course_code),
-                            keyword_search(conn, question, course_code)])
+        merged = rrf_merge([vector_search(conn, question, course_code, use_prefix=USE_QUERY_PREFIX),
+                            keyword_search(conn, question, course_code)],
+                           weights=[1.0, KEYWORD_WEIGHT])
         return merged[:k]
 
 
 def search_with_confidence(question, course_code=None, k=5):
     """Hybrid results PLUS the best vector similarity (how close the closest chunk is)."""
     with get_connection() as conn:
-        vec = vector_search(conn, question, course_code)
+        vec = vector_search(conn, question, course_code, use_prefix=USE_QUERY_PREFIX)
         kw = keyword_search(conn, question, course_code)
     top_similarity = float(vec[0][4]) if vec else 0.0
-    return rrf_merge([vec, kw])[:k], top_similarity
+    return rrf_merge([vec, kw], weights=[1.0, KEYWORD_WEIGHT])[:k], top_similarity
 
 
 if __name__ == "__main__":

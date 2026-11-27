@@ -8,6 +8,9 @@ RAW_DIR = Path("data/raw")
 OUT_FILE = Path("data/processed/pages.jsonl")
 MIN_CHARS = 20   # pages with less text than this are skipped (title/"Thank you" slides)
 
+# 3+ capital letters each separated by ONE space, e.g. "P H A S E" (words are separated by 2+ spaces)
+LETTER_SPACED = re.compile(r"\b[A-Z](?: [A-Z]){2,}\b")
+
 
 def parse_filename(pdf_path):
     """CSN441_notes_unit1.pdf  ->  ("CSN441", "notes_unit1")"""
@@ -21,6 +24,8 @@ def parse_filename(pdf_path):
 
 def clean_text(text):
     text = text.replace("\u00a0", " ")             # odd invisible spaces → normal spaces
+    # Day 11: join letter-spaced headings BEFORE collapsing spaces: "P H A S E" → "PHASE"
+    text = LETTER_SPACED.sub(lambda m: m.group(0).replace(" ", ""), text)
     text = re.sub(r"[ \t]+", " ", text)            # many spaces → one space
     text = re.sub(r"\n{3,}", "\n\n", text)         # many blank lines → one blank line
     return text.strip()
@@ -35,7 +40,7 @@ def extract_pdf(pdf_path):
             page_number = i + 1
             if len(text) < MIN_CHARS:
                 skipped.append(page_number)
-                continue                            # skip this page, go to the next
+                continue
             records.append({
                 "source": pdf_path.name,
                 "course_code": course_code,
@@ -52,7 +57,7 @@ def main():
         print("No PDFs found in", RAW_DIR)
         return
 
-    OUT_FILE.parent.mkdir(parents=True, exist_ok=True)   # create data/processed/ if missing
+    OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     total = 0
     with OUT_FILE.open("w", encoding="utf-8") as f:
         for pdf_path in pdf_files:

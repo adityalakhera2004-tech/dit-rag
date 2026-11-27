@@ -120,3 +120,10 @@
   Search = previous question + new question; course carries over; last answered turn (≤600 chars) goes in the prompt; prompt rule 6.
 - Browser test: "give me an example" after lexeme → lexeme examples; "explain it in simple words" after perceptron → perceptron (follow-up, 0.77).
 - 16 pytest tests pass. Upgrade path: LLM query rewriting (costs an extra call per follow-up).
+
+## Day 11: Answer eval (eval/eval_answers.py, resumable, 6s pause between LLM calls)
+- Answered 23/24 real questions; key facts 22/24 automatic, 23/24 after manual review (q04 said "step activation function").
+- Correct page cited 23/24 (95.8%); 0 made-up citations.
+- Out-of-scope refused 6/6: 2 early (similarity), 4 by the LLM (incl. BST and linked list, which passed the threshold).
+- q20 failed in retrieval → bot refused instead of hallucinating.
+- All answers from Nemotron 3 Ultra. Answer key NOT edited after seeing results.

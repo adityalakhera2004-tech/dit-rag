@@ -5,3 +5,5 @@ data/raw/
 .DS_Store
 data/processed/
 .pytest_cache/
+eval/*_slides.txt
+data/later/
