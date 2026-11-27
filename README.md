@@ -2,7 +2,7 @@
 
 Ask questions about DIT University course notes and get short answers **grounded only in the notes**, with **file and page citations** for every sentence.
 
-**Live demo:** _coming soon_ · **Stack:** Python, PostgreSQL + pgvector, Postgres full-text search, sentence-transformers (bge-small), OpenRouter LLMs, Streamlit, Docker, Neon
+**Live demo:**  https://dit-notes.streamlit.app *(free hosting: the first question after a quiet spell can take a few extra seconds while the database wakes up)*· **Stack:** Python, PostgreSQL + pgvector, Postgres full-text search, sentence-transformers (bge-small), OpenRouter LLMs, Streamlit, Docker, Neon
 
 > Example: *"What are the prerequisites for CSN 441?"* → *"The prerequisite for CSN 441 is Basic Mathematics [1]."*, citing `CSN441_notes_unit3.pdf, page 1`.
 
@@ -65,7 +65,7 @@ flowchart LR
 | **pgvector instead of a dedicated vector DB** | One Postgres database provides vector search, keyword search and SQL filters, and deploys as a normal managed Postgres. |
 | **Hybrid search (vector + keyword, RRF)** | Rescues keyword-dependent queries vector search can miss (e.g. a slide found only through the word "prerequisites"). RRF merges by rank because the two score scales aren't comparable. |
 | **Similarity threshold 0.55** before calling the LLM | Clearly off-topic questions are refused instantly and for free. Set below the weakest real question (0.626), because blocking a real question is worse than one extra LLM call. |
-| **Free LLMs behind a fallback chain** | Free models often return 429/503, so the app retries temporary errors only, falls back across models ordered by observed reliability, and records which model answered. |
+| **Free LLMs behind a fallback chain** | Free models often return 429/503 or stall. Each model gets a 25-second deadline to send its first token; on an error, timeout or empty reply the app moves to the next model, and records which model answered. Bounded worst-case wait instead of a hang. |
 | **Rule-based follow-up detection** | "Give me an example" is searched together with the previous question. Chosen over LLM query rewriting to avoid an extra API call per follow-up on the free tier. |
 | **Exact page lists per chunk** | Image-only pages are skipped, so a chunk labelled "pages 125-130" really held 125, 129 and 130. Citations use the exact list. |
 
@@ -107,6 +107,19 @@ flowchart LR
 - Every citation is checked against the real sources.
 
 ---
+## Deployment
+
+- **App:** Streamlit Community Cloud, redeployed on every push to `main`.
+- **Database:** Neon (hosted Postgres + pgvector). After loading, the retrieval eval was re-run against Neon and matched the local numbers exactly.
+- **Secrets:** `.env` locally (gitignored); Streamlit's secret store in production. Same code, different config.
+- **Lean install:** `requirements.txt` uses the CPU-only PyTorch build; the full local environment is in `requirements-dev.txt`.
+
+### Production issues found after deploying
+| Issue | Fix |
+|---|---|
+| Server tried to reach `localhost` for the database | Environment-specific `DATABASE_URL` in the secret store; errors now logged with `traceback.print_exc()` |
+| LLM errors arriving *inside* the stream bypassed the model fallback | Commit to a model only after its first token arrives |
+| Slow free models could hang the app indefinitely | 25-second first-token deadline per model, then the next model, then a polite "busy" message |
 
 ## Known limitations
 
