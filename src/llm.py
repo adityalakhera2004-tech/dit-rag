@@ -42,7 +42,35 @@ def generate(prompt, max_tokens=1000, temperature=0.0):
                 )
                 text = response.choices[0].message.content
                 if text:                         # skip empty replies
-                                        return text.strip(), response.model or model
+                    return text.strip(), response.model or model
+            except RETRYABLE_ERRORS as e:
+                print(f"  {model} failed (try {attempt + 1}): "
+                      f"{type(e).__name__} - {getattr(e, 'body', e)}")
+                time.sleep(10)
+    raise RuntimeError("All models failed. Try again in a few minutes.")
+
+
+def _text_pieces(stream):
+    """Generator: yield each small piece of text as it arrives."""
+    for chunk in stream:
+        if chunk.choices and chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
+
+
+def generate_stream(prompt, max_tokens=1000, temperature=0.0):
+    """Start a streamed answer. Returns (model_used, generator of text pieces).
+    Falls back between models only BEFORE the first piece arrives."""
+    for model in MODELS:
+        for attempt in range(2):
+            try:
+                stream = get_client().chat.completions.create(
+                    model=model,
+                    max_tokens=max_tokens,
+                    temperature=temperature,
+                    messages=[{"role": "user", "content": prompt}],
+                    stream=True,
+                )
+                return model, _text_pieces(stream)
             except RETRYABLE_ERRORS as e:
                 print(f"  {model} failed (try {attempt + 1}): "
                       f"{type(e).__name__} - {getattr(e, 'body', e)}")
