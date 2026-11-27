@@ -1,3 +1,4 @@
+import traceback
 import streamlit as st
 
 from courses import COURSES
@@ -106,6 +107,7 @@ if question := st.chat_input("Ask about your course notes..."):
             text = BUSY
             st.markdown(text)
         except Exception:                           # last-resort safety net
+            traceback.print_exc()                   # full error goes to the server logs, never to the student
             text = "Sorry, something went wrong while answering. Please try again."
             st.markdown(text)
 
